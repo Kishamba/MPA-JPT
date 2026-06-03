@@ -1,13 +1,14 @@
 "use client";
 
 import { type MouseEvent, useMemo, useRef, useState } from "react";
-import { type VenueZone, type ZoneSystem, zones } from "@/data/zones";
+import type { SystemKey, Zone } from "@/data/types";
+import { zones } from "@/data/zones";
 
 type Layer = "Base" | "Security" | "Power" | "Broadcast" | "Ceremonies" | "Logistics" | "HSE";
 
 const layers: Layer[] = ["Base", "Security", "Power", "Broadcast", "Ceremonies", "Logistics", "HSE"];
 
-const layerSystem: Partial<Record<Layer, ZoneSystem>> = {
+const layerSystem: Partial<Record<Layer, SystemKey>> = {
   Security: "security",
   Power: "power",
   Broadcast: "broadcast",
@@ -15,7 +16,7 @@ const layerSystem: Partial<Record<Layer, ZoneSystem>> = {
   Logistics: "logistics"
 };
 
-const systemStyles: Record<ZoneSystem, { border: string; bg: string; text: string; dot: string }> = {
+const systemStyles: Record<SystemKey, { border: string; bg: string; text: string; dot: string }> = {
   power: {
     border: "border-yellow-300/70",
     bg: "bg-yellow-300/16",
@@ -66,25 +67,27 @@ const systemStyles: Record<ZoneSystem, { border: string; bg: string; text: strin
   }
 };
 
-const riskStyles: Record<VenueZone["riskLevel"], string> = {
+const riskStyles: Record<Zone["riskLevel"], string> = {
   low: "border-signal-green/35 bg-signal-green/10 text-signal-green",
   medium: "border-signal-amber/35 bg-signal-amber/10 text-signal-amber",
   high: "border-orange-300/40 bg-orange-400/10 text-orange-200",
   critical: "border-signal-red/45 bg-signal-red/10 text-signal-red"
 };
 
-const statusLabels: Record<VenueZone["status"], string> = {
+const statusLabels: Record<Zone["status"], string> = {
+  planned: "Planned",
   ready: "Ready",
   "in-progress": "In Progress",
   blocked: "Blocked",
-  watch: "Watch"
+  delayed: "Delayed",
+  operational: "Operational"
 };
 
 const zoomStep = 0.15;
 const minZoom = 0.7;
 const maxZoom = 2.4;
 
-function isZoneVisible(zone: VenueZone, activeLayer: Layer) {
+function isZoneVisible(zone: Zone, activeLayer: Layer) {
   if (activeLayer === "Base") {
     return true;
   }
@@ -99,7 +102,7 @@ function isZoneVisible(zone: VenueZone, activeLayer: Layer) {
 export function VenueMap() {
   const mapShellRef = useRef<HTMLDivElement>(null);
   const [activeLayer, setActiveLayer] = useState<Layer>("Base");
-  const [selectedZone, setSelectedZone] = useState<VenueZone>(zones[0]);
+  const [selectedZone, setSelectedZone] = useState<Zone>(zones[0]);
   const [zoom, setZoom] = useState(1);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -283,7 +286,7 @@ export function VenueMap() {
                     <span className="flex items-center gap-2">
                       <span className={`h-2 w-2 rounded-full ${styles.dot}`} />
                       <span className={`truncate text-xs font-semibold uppercase tracking-[0.12em] ${styles.text}`}>
-                        {zone.id}
+                        {zone.shortName}
                       </span>
                     </span>
                     <span className="mt-1 block truncate text-sm font-semibold text-white">{zone.name}</span>
@@ -338,11 +341,31 @@ export function VenueMap() {
               <dd className="mt-2 flex flex-wrap gap-2">
                 {selectedZone.dependencies.map((dependency) => (
                   <span
-                    key={dependency}
-                    className="rounded border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-300"
+                    key={dependency.id}
+                    className={`rounded border px-2.5 py-1 text-xs ${riskStyles[dependency.risk]}`}
                   >
-                    {dependency}
+                    {dependency.label} · {dependency.system}
                   </span>
+                ))}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-[0.18em] text-slate-500">Sources</dt>
+              <dd className="mt-2 space-y-2">
+                {selectedZone.sourceRefs.map((source) => (
+                  <div
+                    key={`${source.type}-${source.document}-${source.page ?? "na"}-${source.note ?? ""}`}
+                    className="rounded border border-white/10 bg-white/5 p-3"
+                  >
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span className="font-semibold uppercase tracking-[0.14em] text-signal-cyan">
+                        {source.type}
+                      </span>
+                      <span className="text-slate-300">{source.document}</span>
+                      {source.page ? <span className="text-slate-500">p. {source.page}</span> : null}
+                    </div>
+                    {source.note ? <p className="mt-1 text-xs leading-5 text-slate-400">{source.note}</p> : null}
+                  </div>
                 ))}
               </dd>
             </div>

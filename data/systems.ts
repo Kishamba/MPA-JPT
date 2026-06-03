@@ -1,6 +1,9 @@
+import type { SystemKey } from "@/data/types";
+
 export type SystemStatus = "Nominal" | "Watch" | "Critical";
 
 export type SiteSystem = {
+  key: SystemKey;
   name: string;
   owner: string;
   status: SystemStatus;
@@ -10,6 +13,7 @@ export type SiteSystem = {
 
 export const systems: SiteSystem[] = [
   {
+    key: "power",
     name: "Power & Utilities",
     owner: "Infrastructure",
     status: "Watch",
@@ -17,6 +21,7 @@ export const systems: SiteSystem[] = [
     detail: "Temporary power, water, drainage, and utility tie-ins."
   },
   {
+    key: "security",
     name: "Security",
     owner: "Venue Security",
     status: "Nominal",
@@ -24,6 +29,7 @@ export const systems: SiteSystem[] = [
     detail: "Perimeter, screening, access control, and lockdown readiness."
   },
   {
+    key: "broadcast",
     name: "Broadcast & Media",
     owner: "Broadcast Ops",
     status: "Watch",
@@ -31,6 +37,7 @@ export const systems: SiteSystem[] = [
     detail: "Camera positions, compounds, commentary, mixed zone, and cable paths."
   },
   {
+    key: "ceremonies",
     name: "Ceremonies",
     owner: "Ceremonies",
     status: "Nominal",
@@ -38,6 +45,7 @@ export const systems: SiteSystem[] = [
     detail: "Field of play transitions, rehearsals, show power, and staging."
   },
   {
+    key: "sport",
     name: "Athlete Operations",
     owner: "Sport",
     status: "Nominal",
@@ -45,6 +53,7 @@ export const systems: SiteSystem[] = [
     detail: "Athlete flow, warm-up zones, changing rooms, and sport services."
   },
   {
+    key: "logistics",
     name: "Logistics",
     owner: "Logistics",
     status: "Watch",
@@ -52,6 +61,7 @@ export const systems: SiteSystem[] = [
     detail: "Load-in routes, laydown areas, material handling, and deliveries."
   },
   {
+    key: "overlay",
     name: "Overlay",
     owner: "Overlay Delivery",
     status: "Nominal",
@@ -59,6 +69,7 @@ export const systems: SiteSystem[] = [
     detail: "Temporary structures, fencing, wayfinding, fit-out, and site furniture."
   },
   {
+    key: "hse",
     name: "HSE & Emergency",
     owner: "HSE",
     status: "Critical",
